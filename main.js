@@ -9,8 +9,7 @@ require('./fileTransformer');
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    fullscreen: true,
     webPreferences: {
       preload: path.join(__dirname, 'public/preload.js'),
       nodeIntegration:true,
