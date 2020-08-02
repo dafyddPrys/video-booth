@@ -38,11 +38,14 @@ ipcRenderer.on('download-reply', handleUploadReply);
  * Called from mediaSelector.js
  * 
  * Initialise a MediaRecorder with the mediaStream and a compatible mime type.
+ *
+ * Get a reasonably high quality recording by setting the bitrate to 2.5Mb per sec 
+ * in the options videoBitsPerSecond. It seemed to default to about 1Mb per sec otherwise.
  */
 function initRecorder(stream) {
     const firstCompatibleMimeType = types.find(t => MediaRecorder.isTypeSupported(t))
     console.log(`using mime type ${firstCompatibleMimeType}`);
-    var options = { mimeType: firstCompatibleMimeType };
+    var options = { mimeType: firstCompatibleMimeType , videoBitsPerSecond: 2500000};
 
     recorder = new MediaRecorder(stream, options)
     recorder.ondataavailable = handleDataAvailable;
