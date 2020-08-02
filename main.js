@@ -1,25 +1,26 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain} = require('electron')
-const path = require('path')
+const {app, BrowserWindow, ipcMain} = require('electron');
+const path = require('path');
+const fs = require('fs');
 
-require('./lib/ipc.js')
+// require('./lib/ipc.js')
+require('./fileTransformer');
 
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    fullscreen: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'public/preload.js'),
       nodeIntegration:true,
     }
-  })
+  });
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 // Config to stop deprecation message
@@ -41,4 +42,24 @@ app.on('activate', function () {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
+/*
+* IPC handlers
+*/
+ipcMain.on('download', saveVideoStreamToFile);
 
+function saveVideoStreamToFile(event, args) {
+  var buff = new Buffer.from(args.data, 'base64');
+  const filename = `test-${Date.now()}.webm`;
+  fs.writeFile(filename, buff, (err) => {
+    if (err) {
+      event.reply('download-reply', {
+        success: false,
+        error: err,
+      });
+    } else {
+      event.reply('download-reply', {
+        success: true
+      });
+    }
+  });
+}

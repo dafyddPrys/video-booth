@@ -1,5 +1,12 @@
 # Video booth
 
+## update:
+successfully recorded video using mediaRecorder, converted to base64 string, sent to server over IPC, wrote to buffer, saved to file. 
+
+USB mic is broken, probably worth trying on mac and tidying it up. no reason it shouldn't work on mac then.
+
+- make recorded chunks only ontain the latest recording blob (it currently doesnt delete after its been saved)
+
 ## How I am running this
 Running this on the pi under /home/pi/workspace/video-1
 ssh onto it from vscode and see it work using vnc.
