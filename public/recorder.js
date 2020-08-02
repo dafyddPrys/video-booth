@@ -8,7 +8,9 @@ const {ipcRenderer} = require('electron');
 var recorder;
 let recordedChunks = [];
 
-var recorderCreatedEvent = new Event('recorder-created')
+// used to trigger functions in ui.js
+var recorderStartedEvent = new Event('recorder-started');
+var recorderStoppedEvent = new Event('recorder-stopped');
 
 /**
  * Mime types, should be in order of preference.
@@ -45,7 +47,6 @@ function initRecorder(stream) {
     recorder = new MediaRecorder(stream, options)
     recorder.ondataavailable = handleDataAvailable;
 
-    window.dispatchEvent(recorderCreatedEvent);
     return stream
 }
 
@@ -75,7 +76,9 @@ function uploadToMain() {
     reader.readAsDataURL(recordedChunks[0]);
 }
 
-function startRecorder() {
+async function startRecorder() {
+    window.dispatchEvent(recorderStartedEvent);
+
     if (!recorder) {
         console.log('no recorder, doing nothing')
         return
@@ -87,15 +90,17 @@ function startRecorder() {
 
     recorder.start()
 
-    // demo: to download after 3sec
-    setTimeout(() => {
-        console.log("stopping");
-        recorder.stop();
-    }, 3000);
+    await new Promise(r => setTimeout(r, 10000));
+    if (recorder.state == 'recording') {
+        stopRecorder();
+    }
 }
 
 function stopRecorder() {
-    ipcRenderer.send('record', 'stop');
+    window.dispatchEvent(recorderStoppedEvent);
+
+    console.log('stopping');
+    recorder.stop();
 }
 
 function handleUploadReply(event, arg) {
