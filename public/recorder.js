@@ -41,8 +41,7 @@ ipcRenderer.on('download-reply', handleUploadReply);
  * 
  * Initialise a MediaRecorder with the mediaStream and a compatible mime type.
  *
- * Get a reasonably high quality recording by setting the bitrate to 2.5Mb per sec 
- * in the options videoBitsPerSecond. It seemed to default to about 1Mb per sec otherwise.
+ * Not sure if the Pi camera takes any notice of the videoBitsPerSecond parameter.
  */
 function initRecorder(stream) {
     const firstCompatibleMimeType = types.find(t => MediaRecorder.isTypeSupported(t))
