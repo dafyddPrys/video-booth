@@ -51,7 +51,7 @@ function initRecorder(stream) {
 
     recorder = new MediaRecorder(stream, options)
     recorder.ondataavailable = handleDataAvailable;
-	console.log(`Video bitrate ${Recorder.videoBitsPerSecond}`);
+	console.log(`Video bitrate ${recorder.videoBitsPerSecond}`);
 
     return stream
 }
