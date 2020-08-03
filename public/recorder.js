@@ -46,7 +46,7 @@ ipcRenderer.on('download-reply', handleUploadReply);
 function initRecorder(stream) {
     const firstCompatibleMimeType = types.find(t => MediaRecorder.isTypeSupported(t))
     console.log(`using mime type ${firstCompatibleMimeType}`);
-    var options = { mimeType: firstCompatibleMimeType , bitsPerSecond: 2500000};
+    var options = { mimeType: firstCompatibleMimeType };
 
     recorder = new MediaRecorder(stream, options)
     recorder.ondataavailable = handleDataAvailable;
