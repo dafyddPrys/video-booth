@@ -67,7 +67,7 @@ function start() {
   const constraints = {
     audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
     video: {deviceId: videoSource ? {exact: videoSource} : undefined},
-	video: {width: { min: 1920 }, height: { min: 1080 }}
+	video: {width: 1920, height: 1080 }
   };
   navigator.mediaDevices.getUserMedia(constraints)
     .then(initRecorder)
