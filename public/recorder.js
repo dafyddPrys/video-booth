@@ -41,12 +41,11 @@ ipcRenderer.on('download-reply', handleUploadReply);
  *
  * Get a reasonably high quality recording by setting the bitrate to 2.5Mb per sec 
  * in the options videoBitsPerSecond. It seemed to default to about 1Mb per sec otherwise.
- * Pi seems to ignore videoBitsPerSecond so trying bitsPerSecond as target for aggregate audio plus video
  */
 function initRecorder(stream) {
     const firstCompatibleMimeType = types.find(t => MediaRecorder.isTypeSupported(t))
     console.log(`using mime type ${firstCompatibleMimeType}`);
-    var options = { mimeType: firstCompatibleMimeType };
+    var options = { mimeType: firstCompatibleMimeType , videoBitsPerSecond: 6000000, audioBitsPerSecond: 48000};
 
     recorder = new MediaRecorder(stream, options)
     recorder.ondataavailable = handleDataAvailable;
