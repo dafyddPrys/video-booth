@@ -44,7 +44,7 @@ async function webmToSomething(filename) {
     video.setVideoFormat('mp4');
     video.setVideoFrameRate(30);
 	/* video.setVideoBitRate(4096); */
-	video.addCommand('-b:v', 4096);
+	/* video.addCommand('-b:v', 4096); */
 
     video.save(`./video-${Date.now()}.mp4`, (error, outputFile) => {
       if (error) {
