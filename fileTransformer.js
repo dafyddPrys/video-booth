@@ -37,7 +37,8 @@ async function convertFile(filename) {
     // more options to set, need to learn what is available
     video.setVideoFormat('mp4');
     video.setVideoFrameRate(30);
-	video.setVideoBitRate(4096);
+	/* video.setVideoBitRate(4096); */
+	video.addCommand('-b:v', '4096');
 
     console.debug(video.info_configuration);
 
