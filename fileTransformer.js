@@ -58,7 +58,7 @@ async function webmToSomething(filename) {
       console.log(`File saved: ${outputFile}`);
 	  
 	  // Check for presence of USB stick 
-	  fs.access(copyDir, function(err) {
+	  fs.access(copyDir, (err) => {
 	  if (err) {
         console.log(`USB drive not found at ${copyDir}`);
       } else {
