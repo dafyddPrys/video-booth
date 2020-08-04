@@ -7,7 +7,9 @@ const ffmpeg = require('ffmpeg');
 
 const targetExtension = /.webm/;
 const watchDir = './';
-const outputDir = '.';
+const outputDir = './out';
+const copyDir = '/media/pi/09C0-B4DC/';  // Location of Integral USB stick on Pi
+// const copyDir = 'D:/Temp/';  // For testing on PC
 
 const fileQueue = [];
 
@@ -37,16 +39,35 @@ async function convertFile(filename) {
     // Use built-in options of node-ffmpeg
     video.setVideoFormat('mp4');
     video.setVideoFrameRate(30);
-	// Use some custom commands to pass to ffmpeg
-	// Set video bitrate for mp4 output file. The built-in function seemed to append a 'b' to the value which upset ffmpeg.
-	video.addCommand('-b:v', '2500k' );
-	// Add audio delay to output file in ms using an audio filter
-	video.addCommand('-af', "adelay=1000" );
+    // Use some custom commands to pass to ffmpeg
+    // Set video bitrate for mp4 output file. The built-in function seemed to append a 'b' to the value which upset ffmpeg.
+    video.addCommand('-b:v', '2500k' );
+    // Add audio delay to output file in ms using an audio filter
+    video.addCommand('-af', "adelay=1000" );
 
     console.debug(video.info_configuration);
 
     let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
     console.log(`File saved: ${outFile}`);
+
+    // Check for presence of USB stick 
+	  fs.access(copyDir, function(err) {
+      if (err) {
+          console.log(`USB drive not found at ${copyDir}`);
+      } else {
+        console.log(`USB drive found at ${copyDir}.`);
+        // Copy the new mp4 file to the USB stick
+        fs.copyFile(outputFile, copyDir + outputFile.substring(2) , (err) => {
+          if (err) {
+            console.log(`Error copying file ${outputFile} to ${copyDir}`);
+          }
+          else {
+            console.log(`File ${outputFile} copied to ${copyDir}${outputFile.substring(2)}`);
+          }
+        });	
+      }
+    });
+
 
   } catch (e) {
     console.log(`Failed to process file: ${e.message}`);
