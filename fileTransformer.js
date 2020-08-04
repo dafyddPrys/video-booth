@@ -8,6 +8,8 @@ const ffmpeg = require('ffmpeg');
 const targetExtension = /.webm/;
 const watchDir = './';
 const outputDir = './out';
+const copyDir = '/media/pi/09C0-B4DC/';  // Location of Integral USB stick on Pi
+// const copyDir = 'D:/Temp/';  // For testing on PC
 
 /**
  * Watch for new files
@@ -54,6 +56,25 @@ async function webmToSomething(filename) {
         console.log(`error saving file: ${error}`);
       }
       console.log(`File saved: ${outputFile}`);
+	  
+	  // Check for presence of USB stick 
+	  fs.access(copyDir, function(err) {
+	  if (err) {
+        console.log(`USB drive not found at ${copyDir}`);
+      } else {
+        console.log(`USB drive found at ${copyDir}.`);
+		// Copy the new mp4 file to the USB stick
+		fs.copyFile(outputFile, copyDir + outputFile.substring(2) , (err) => {
+			if (err) {
+				console.log(`Error copying file ${outputFile} to ${copyDir}`);
+			}
+			else {
+				console.log(`File ${outputFile} copied to ${copyDir}${outputFile.substring(2)}`);
+			}
+		});	
+      }
+      })
+	  
     });
   } catch (e) {
     console.log(`Failed to process file:`);
