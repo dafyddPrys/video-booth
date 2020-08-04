@@ -16,7 +16,7 @@ var recorderStoppedEvent = new Event('recorder-stopped');
  * Mime types, should be in order of preference.
  */
 var types = [
-	"video/webm\;codecs=h264",
+	"video/webm\;codecs=h264,opus",
 	"video/webm\;codecs=vp9",
 	"video/webm\;codecs=vp8",
     "video/webm\;codecs=h264",
