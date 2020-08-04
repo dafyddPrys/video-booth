@@ -34,11 +34,14 @@ async function convertFile(filename) {
   try {
     const video = await new ffmpeg(filename);
     
-    // more options to set, need to learn what is available
+    // Use built-in options of node-ffmpeg
     video.setVideoFormat('mp4');
     video.setVideoFrameRate(30);
-	/* video.setVideoBitRate(4096); */
-	/* video.addCommand('-b:v', 4096); */
+	// Use some custom commands to pass to ffmpeg
+	// Set video bitrate for mp4 output file. The built-in function seemed to append a 'b' to the value which upset ffmpeg.
+	video.addCommand('-b:v', '2500k' );
+	// Add audio delay to output file in ms using an audio filter
+	video.addCommand('-af', "adelay=1000" );
 
     console.debug(video.info_configuration);
 
