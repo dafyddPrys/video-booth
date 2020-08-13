@@ -7,7 +7,7 @@ const ffmpeg = require('ffmpeg');
 
 const targetExtension = /.webm/;
 const watchDir = './';
-const outputDir = './';
+const outputDir = '.';
 
 const fileQueue = [];
 
@@ -43,12 +43,9 @@ async function convertFile(filename) {
     video.setVideoFormat('mp4');
     video.setVideoFrameRate(25);
 
-    video.save(`${outputDir}/video-${Date.now()}.mp4`, (error, outputFile) => {
-      if (error) {
-        console.log(`error saving file: ${error}`);
-      }
-      console.log(`File saved: ${outputFile}`);
-    });
+    let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
+    console.log(`File saved: ${outFile}`);
+
   } catch (e) {
     console.log(`Failed to process file:`);
     console.log(e);
