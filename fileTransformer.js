@@ -21,6 +21,7 @@ function watchForNewFiles(dir, extension, queue) {
       if (eventType == 'rename' && filename.endsWith(extension)) {
         console.log(`Got a new ${extension} file. Adding to queue`);
         queue.push(filename)
+        console.log(queue)
       } else {
         console.log('file change');
       }
@@ -35,8 +36,8 @@ async function convertFile(filename) {
   console.log(`processing file ${filename}`);
   try {
     const video = await new ffmpeg(filename);
-    console.log(video.metadata);
-    console.log(video.info_configuration);
+    // console.log(video.metadata);
+    // console.log(video.info_configuration);
     
     // more options to set, need to learn what is available
     video.setVideoFormat('mp4');
@@ -67,6 +68,10 @@ async function processQueue(queue, cb) {
     }
 
     const filename = queue.shift()
+    console.log(`Waiting before processing ${filename}`)
+    await new Promise(r => setTimeout(r, 3000));
+    console.log('Done processing. queue now looks like')
+    console.log(queue)
     await cb(filename)
   }
 }
