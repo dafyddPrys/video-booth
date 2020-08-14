@@ -5,10 +5,10 @@ const ffmpeg = require('ffmpeg');
  * call transformation function on them.
  */
 
-const targetExtension = /.webm/;
 const watchDir = './';
 const outputDir = './out';
-const copyDir = '/media/pi/09C0-B4DC/';  // Location of Integral USB stick on Pi
+// const copyDir = '/media/pi/09C0-B4DC/';  // Location of Integral USB stick on Pi
+const copyDir = '/Users/daf/workspace/video-booth/test/'
 // const copyDir = 'D:/Temp/';  // For testing on PC
 
 const fileQueue = [];
@@ -49,6 +49,11 @@ async function convertFile(filename) {
 
     let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
     console.log(`File saved: ${outFile}`);
+    console.log(outFile.substring(2))
+
+    if (!copyDir) {
+      return
+    }
 
     // Check for presence of USB stick 
 	  fs.access(copyDir, function(err) {
@@ -56,13 +61,17 @@ async function convertFile(filename) {
           console.log(`USB drive not found at ${copyDir}`);
       } else {
         console.log(`USB drive found at ${copyDir}.`);
+
+        // from ./out/whatever/test.mp4, get test.mp4
+        let outFileName = outFile.split(/\//g).pop();
+
         // Copy the new mp4 file to the USB stick
-        fs.copyFile(outputFile, copyDir + outputFile.substring(2) , (err) => {
+        fs.copyFile(outFile, copyDir + outFileName , (err) => {
           if (err) {
-            console.log(`Error copying file ${outputFile} to ${copyDir}`);
+            console.log(`Error copying file ${outFile} to ${copyDir}`);
           }
           else {
-            console.log(`File ${outputFile} copied to ${copyDir}${outputFile.substring(2)}`);
+            console.log(`File ${outFile} copied to ${copyDir}${outFileName}`);
           }
         });	
       }
@@ -99,6 +108,7 @@ function ensureDirExists(dir) {
     fs.mkdirSync(dir);
   }
 }
+
 
 ensureDirExists(outputDir)
 watchForNewFiles(watchDir, '.webm', fileQueue);
