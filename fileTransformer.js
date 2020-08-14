@@ -14,19 +14,16 @@ const fileQueue = [];
 // watchForNewFiles watches for new files. If new file extension ends
 // in `extension`, then add the filename to the `queue`.
 function watchForNewFiles(dir, extension, queue) {
-  console.log('watch for new files');
   fs.watch(dir, (eventType, filename) => {
     if (filename) {
-      console.log(`File rename: ${filename}`);
       if (eventType == 'rename' && filename.endsWith(extension)) {
-        console.log(`Got a new ${extension} file. Adding to queue`);
+        console.log(`Adding ${filename} to queue`);
         queue.push(filename)
-        console.log(queue)
       } else {
-        console.log('file change');
+        console.debug(`Ignoring file event type ${eventType} on file ${filename}`);
       }
     } else {
-      console.log('no filename');
+      console.debug('no filename');
     }
   });
 }
@@ -36,19 +33,18 @@ async function convertFile(filename) {
   console.log(`processing file ${filename}`);
   try {
     const video = await new ffmpeg(filename);
-    // console.log(video.metadata);
-    // console.log(video.info_configuration);
     
     // more options to set, need to learn what is available
     video.setVideoFormat('mp4');
     video.setVideoFrameRate(25);
 
+    console.debug(video.info_configuration);
+
     let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
     console.log(`File saved: ${outFile}`);
 
   } catch (e) {
-    console.log(`Failed to process file:`);
-    console.log(e);
+    console.log(`Failed to process file: ${e.message}`);
   }
 
 }
@@ -59,16 +55,14 @@ async function processQueue(queue, cb) {
   while (true) {
     // If there are no files, wait for a bit and try again
     if (queue.length == 0) {
-      console.log('waiting')
+      console.debug('No files. Waiting')
       await new Promise(r => setTimeout(r, 1000));
       continue
     }
 
+    console.debug(`Queue has ${queue.length} files waiting`)
     const filename = queue.shift()
-    console.log(`Waiting before processing ${filename}`)
-    await new Promise(r => setTimeout(r, 3000));
-    console.log('Done processing. queue now looks like')
-    console.log(queue)
+    console.debug(`Taken filename ${filename} off the queue to process`)
     await cb(filename)
   }
 }
