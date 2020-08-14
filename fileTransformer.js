@@ -54,7 +54,7 @@ async function convertFile(filename) {
     }
 
     // Check for presence of USB stick 
-	  fs.access(copyDir, function(err) {
+	  fs.access(copyDir, (err) => {
       if (err) {
           console.log(`USB drive not found at ${copyDir}`);
       } else {
@@ -73,7 +73,6 @@ async function convertFile(filename) {
           }
         });	
       }
-      console.log(`File saved: ${outputFile}`);
     });
 
 
