@@ -7,8 +7,7 @@ const ffmpeg = require('ffmpeg');
 
 const watchDir = './';
 const outputDir = './out';
-// const copyDir = '/media/pi/09C0-B4DC/';  // Location of Integral USB stick on Pi
-const copyDir = '/Users/daf/workspace/video-booth/test/'
+const copyDir = '/media/pi/09C0-B4DC/';  // Location of Integral USB stick on Pi
 // const copyDir = 'D:/Temp/';  // For testing on PC
 
 const fileQueue = [];
@@ -49,7 +48,6 @@ async function convertFile(filename) {
 
     let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
     console.log(`File saved: ${outFile}`);
-    console.log(outFile.substring(2))
 
     if (!copyDir) {
       return
@@ -75,6 +73,7 @@ async function convertFile(filename) {
           }
         });	
       }
+      console.log(`File saved: ${outputFile}`);
     });
 
 
