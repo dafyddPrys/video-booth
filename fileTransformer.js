@@ -7,57 +7,75 @@ const ffmpeg = require('ffmpeg');
 
 const targetExtension = /.webm/;
 const watchDir = './';
-const outputDir = './out';
+const outputDir = '.';
 
-/**
- * Watch for new files
- */
+const fileQueue = [];
 
-function watchForNewFiles(dir, extension, callback) {
-  console.log('watch for new files');
+// watchForNewFiles watches for new files. If new file extension ends
+// in `extension`, then add the filename to the `queue`.
+function watchForNewFiles(dir, extension, queue) {
   fs.watch(dir, (eventType, filename) => {
     if (filename) {
-      console.log(`File rename: ${filename}`);
       if (eventType == 'rename' && filename.endsWith(extension)) {
-        console.log(`Got a new ${extension} file. processing`);
-        callback(filename);
+        console.log(`Adding ${filename} to queue`);
+        queue.push(filename)
       } else {
-        console.log('file change');
+        console.debug(`Ignoring file event type ${eventType} on file ${filename}`);
       }
     } else {
-      console.log('no filename');
+      console.debug('no filename');
     }
   });
 }
 
-/**
-* Transform the given file with ffmpeg
-*/
-async function webmToSomething(filename) {
+// convertFile: transform the given file with ffmpeg
+async function convertFile(filename) {
   console.log(`processing file ${filename}`);
   try {
     const video = await new ffmpeg(filename);
-    console.log(video.metadata);
-    console.log(video.info_configuration);
     
     // more options to set, need to learn what is available
     video.setVideoFormat('mp4');
     video.setVideoFrameRate(25);
 
-    video.save(`./video-${Date.now()}.mp4`, (error, outputFile) => {
-      if (error) {
-        console.log(`error saving file: ${error}`);
-      }
-      console.log(`File saved: ${outputFile}`);
-    });
+    console.debug(video.info_configuration);
+
+    let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
+    console.log(`File saved: ${outFile}`);
+
   } catch (e) {
-    console.log(`Failed to process file:`);
-    console.log(e);
+    console.log(`Failed to process file: ${e.message}`);
   }
 
 }
 
+// processQueue: one at a time, take `filename`s from the queue
+// and call `cb` on them.
+async function processQueue(queue, cb) {
+  while (true) {
+    // If there are no files, wait for a bit and try again
+    if (queue.length == 0) {
+      console.debug('No files. Waiting')
+      await new Promise(r => setTimeout(r, 1000));
+      continue
+    }
 
-watchForNewFiles(watchDir, '.webm', webmToSomething);
+    console.debug(`Queue has ${queue.length} files waiting`)
+    const filename = queue.shift()
+    console.debug(`Taken filename ${filename} off the queue to process`)
+    await cb(filename)
+  }
+}
+
+// If `dir` doesnt exist, create it.
+function ensureDirExists(dir) {
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+  }
+}
+
+ensureDirExists(outputDir)
+watchForNewFiles(watchDir, '.webm', fileQueue);
+processQueue(fileQueue, convertFile)
 
 
