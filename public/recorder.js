@@ -16,6 +16,8 @@ var recorderStoppedEvent = new Event('recorder-stopped');
  * Mime types, should be in order of preference.
  */
 var types = [
+	"video/webm\;codecs=vp9,opus",
+	"video/webm\;codecs=vp8",
     "video/webm\;codecs=h264",
     "video/webm",
     "video/mpeg",
@@ -39,16 +41,16 @@ ipcRenderer.on('download-reply', handleUploadReply);
  * 
  * Initialise a MediaRecorder with the mediaStream and a compatible mime type.
  *
- * Get a reasonably high quality recording by setting the bitrate to 2.5Mb per sec 
- * in the options videoBitsPerSecond. It seemed to default to about 1Mb per sec otherwise.
+ * Not sure if the Pi camera takes any notice of the videoBitsPerSecond parameter.
  */
 function initRecorder(stream) {
     const firstCompatibleMimeType = types.find(t => MediaRecorder.isTypeSupported(t))
     console.log(`using mime type ${firstCompatibleMimeType}`);
-    var options = { mimeType: firstCompatibleMimeType , videoBitsPerSecond: 2500000};
+	var options = { mimeType: firstCompatibleMimeType , videoBitsPerSecond: 5000000, audioBitsPerSecond: 48000};
 
     recorder = new MediaRecorder(stream, options)
     recorder.ondataavailable = handleDataAvailable;
+	console.log(`Video bitrate ${recorder.videoBitsPerSecond}`);
 
     return stream
 }
