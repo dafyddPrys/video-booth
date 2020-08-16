@@ -95,7 +95,7 @@ async function startRecorder() {
 
     recorder.start()
 
-    await new Promise(r => setTimeout(r, 10000));
+    await new Promise(r => setTimeout(r, 30000));
     if (recorder.state == 'recording') {
         stopRecorder();
     }
