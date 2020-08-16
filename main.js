@@ -3,8 +3,7 @@ const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// require('./lib/ipc.js')
-require('./fileTransformer');
+const { spawn } = require('child_process')
 
 function createWindow () {
   // Create the browser window.
@@ -63,3 +62,16 @@ function saveVideoStreamToFile(event, args) {
     }
   });
 }
+
+/**
+ * Filetransformer child process
+ */
+const ft = spawn('node', ['fileTransformer.js'])
+
+ft.stdout.on('data', (data) => {
+  console.error(`filetransformer: ${data}`);
+});
+
+ft.stderr.on('data', (data) => {
+  console.error(`filetransformer error: ${data}`);
+});

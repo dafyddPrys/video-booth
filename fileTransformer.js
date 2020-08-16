@@ -44,7 +44,7 @@ async function convertFile(filename) {
     // Add audio delay to output file in ms using an audio filter
     video.addCommand('-af', "adelay=1000" );
 
-    console.debug(video.info_configuration);
+    // console.debug(video.info_configuration);
 
     let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
     console.log(`File saved: ${outFile}`);
