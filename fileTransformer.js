@@ -15,6 +15,7 @@ const fileQueue = [];
 // watchForNewFiles watches for new files. If new file extension ends
 // in `extension`, then add the filename to the `queue`.
 function watchForNewFiles(dir, extension, queue) {
+  console.log('Watching for file changes')
   fs.watch(dir, (eventType, filename) => {
     if (filename) {
       if (eventType == 'rename' && filename.endsWith(extension)) {
@@ -89,7 +90,6 @@ async function processQueue(queue, cb) {
   while (true) {
     // If there are no files, wait for a bit and try again
     if (queue.length == 0) {
-      console.debug('No files. Waiting')
       await new Promise(r => setTimeout(r, 1000));
       continue
     }

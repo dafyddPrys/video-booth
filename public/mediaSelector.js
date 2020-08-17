@@ -1,6 +1,6 @@
 /**
  * This file is used to select which input devices to use
- * This is necessary because the USB mic we're using doesnt get selected by default.
+ * This is necessary because the USB mic we're using may not get selected by default.
  * This hooks into the `initRecorder` function in `renderer.js`
  */
 
@@ -11,6 +11,10 @@ const audioInputSelect = document.querySelector('select#audioSource');
 const videoSelect = document.querySelector('select#videoSource');
 const selectors = [audioInputSelect, videoSelect];
 
+// Copypasta from site giving example of selecting media input
+// This sets available media inputs in the (hidden) dropdown list
+// so that we can select a different media input for audio/video if
+// necessary.
 function gotDevices(deviceInfos) {
   // Handles being called several times to update labels. Preserve values.
   const values = selectors.map(select => select.value);
@@ -42,7 +46,6 @@ function gotDevices(deviceInfos) {
   });
 }
 
-navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
 function gotStream(stream) {
   window.stream = stream; // make stream available to console
@@ -79,5 +82,6 @@ function start() {
 audioInputSelect.onchange = start;
 
 videoSelect.onchange = start;
+
 
 start();

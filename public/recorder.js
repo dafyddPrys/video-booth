@@ -3,8 +3,6 @@
  * should go in this file.
  */
 
-// const {ipcRenderer} = require('electron');
-
 var recorder;
 let recordedChunks = [];
 
@@ -30,8 +28,6 @@ var types = [
 document.getElementById('record-start').addEventListener('click', startRecorder);
 document.getElementById('record-stop').addEventListener('click', stopRecorder);
 
-// ipcRenderer.on('download-reply', handleUploadReply);
-
 /**
  * Recording logic
  */
@@ -45,12 +41,16 @@ document.getElementById('record-stop').addEventListener('click', stopRecorder);
  */
 function initRecorder(stream) {
     const firstCompatibleMimeType = types.find(t => MediaRecorder.isTypeSupported(t))
-    console.log(`using mime type ${firstCompatibleMimeType}`);
-	var options = { mimeType: firstCompatibleMimeType , videoBitsPerSecond: 5000000, audioBitsPerSecond: 48000};
-
+    console.log(`using first compatible mime type ${firstCompatibleMimeType}`);
+	var options = {
+        mimeType: firstCompatibleMimeType,
+        videoBitsPerSecond: 5000000,
+        audioBitsPerSecond: 48000
+    };
+    
     recorder = new MediaRecorder(stream, options)
-    recorder.ondataavailable = handleDataAvailable;
 	console.log(`Video bitrate ${recorder.videoBitsPerSecond}`);
+    recorder.ondataavailable = handleDataAvailable;
 
     return stream
 }
@@ -71,22 +71,22 @@ function handleDataAvailable(event) {
 
 function uploadToMain() {
     const reader = new FileReader()
-    reader.onload = async () => {
+    reader.onload = function() {
         const b64 = reader.result.replace(/^data:.+;base64,/, '');
 
-
         const request = new XMLHttpRequest();
-        request.open("POST", "/upload", true);
+        request.open("POST", "/upload", true); // true => async
         request.setRequestHeader("Content-Type", "application/json; charset=UTF-8") // maybe?
 
-
         request.onreadystatechange = function() { // Call a function when the state changes.
-            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-                // Request finished. Do processing here.
-                console.log('OK');
-                recordedChunks.shift() // remove the chunk that we've successfully saved
-            } else {
-                console.log(`Not OK: ${this.status}`)
+            if (this.readyState === XMLHttpRequest.DONE) {
+                if (this.status === 200) {
+                    console.log('Video delivered OK')
+                } else {
+                    console.error(`Not OK! Status: ${this.status}`)
+                }
+                // rm the latest chunk, regardless of whether it was successfully saved or not.
+                recordedChunks.shift();
             }
         }
 
@@ -95,7 +95,7 @@ function uploadToMain() {
         }));
     }
 
-    reader.readAsDataURL(recordedChunks[0]);
+    reader.readAsDataURL(recordedChunks[0]); //readAsDataURL reads as base64 encoded string
 }
 
 async function startRecorder() {
@@ -120,7 +120,6 @@ async function startRecorder() {
 
 function stopRecorder() {
     window.dispatchEvent(recorderStoppedEvent);
-
     console.log('stopping');
     recorder.stop();
 }
