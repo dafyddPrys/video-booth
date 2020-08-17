@@ -3,7 +3,7 @@
  * should go in this file.
  */
 
-const {ipcRenderer} = require('electron');
+// const {ipcRenderer} = require('electron');
 
 var recorder;
 let recordedChunks = [];
@@ -17,7 +17,7 @@ var recorderStoppedEvent = new Event('recorder-stopped');
  */
 var types = [
 	"video/webm\;codecs=vp9,opus",
-	"video/webm\;codecs=vp8",
+	// "video/webm\;codecs=vp8", //doesnt work on mac, but needed for pi
     "video/webm\;codecs=h264",
     "video/webm",
     "video/mpeg",
@@ -30,7 +30,7 @@ var types = [
 document.getElementById('record-start').addEventListener('click', startRecorder);
 document.getElementById('record-stop').addEventListener('click', stopRecorder);
 
-ipcRenderer.on('download-reply', handleUploadReply);
+// ipcRenderer.on('download-reply', handleUploadReply);
 
 /**
  * Recording logic
@@ -71,11 +71,28 @@ function handleDataAvailable(event) {
 
 function uploadToMain() {
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
         const b64 = reader.result.replace(/^data:.+;base64,/, '');
-        ipcRenderer.send('download', {
-            data: b64
-        })
+
+
+        const request = new XMLHttpRequest();
+        request.open("POST", "/upload", true);
+        request.setRequestHeader("Content-Type", "application/json; charset=UTF-8") // maybe?
+
+
+        request.onreadystatechange = function() { // Call a function when the state changes.
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                // Request finished. Do processing here.
+                console.log('OK');
+                recordedChunks.shift() // remove the chunk that we've successfully saved
+            } else {
+                console.log(`Not OK: ${this.status}`)
+            }
+        }
+
+        request.send(JSON.stringify({
+            data: b64,
+        }));
     }
 
     reader.readAsDataURL(recordedChunks[0]);
@@ -108,21 +125,11 @@ function stopRecorder() {
     recorder.stop();
 }
 
-function handleUploadReply(event, arg) {
-    if (arg.success) {
-        console.log('video saved successfully')
-        recordedChunks.shift() // remove the chunk that we've successfully saved
-    } else {
-        console.log('error saving video: ${arg.error}')
-    }
-}
 
 
 /**
  * Check which mime types are supported
  */
-
-
 for (var i in types) { 
     console.log(`Is ${types[i]} supported? ${MediaRecorder.isTypeSupported(types[i]) ? "Maybe" : "No"}`);
 };
