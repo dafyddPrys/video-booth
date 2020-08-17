@@ -17,7 +17,7 @@ var recorderStoppedEvent = new Event('recorder-stopped');
  */
 var types = [
 	"video/webm\;codecs=vp9,opus",
-	// "video/webm\;codecs=vp8", //doesnt work on mac, but needed for pi
+	"video/webm\;codecs=vp8", //doesnt work on mac, but needed for pi
     "video/webm\;codecs=h264",
     "video/webm",
     "video/mpeg",
