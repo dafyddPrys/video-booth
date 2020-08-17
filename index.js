@@ -7,7 +7,7 @@ const fs = require('fs')
 const port = 3000
 
 
-app.use(bodyParser.json({ limit: '10mb' }))
+app.use(bodyParser.json({ limit: '30mb' }))
 app.use(express.static('public'))
 
 app.get('/', (req, res) => {
