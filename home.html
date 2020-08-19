@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Sriracha&display=swap" rel="stylesheet">
     <title>Video booth</title>
   </head>
   <body>
@@ -16,6 +16,16 @@
     <div class="video-container">
       
       <video id="video" autoplay></video>
+    </div>
+    <div class="countdown-container">
+      <div id="start-countdown">
+        <p class="cursive">Get ready!</p>
+        <p class="countdown cursive">3</p>
+      </div>
+      <div id="end-countdown" hidden>
+        <p class="cursive">Ending in</p>
+        <p class="countdown cursive">5</p>
+      </div>
     </div>
     <div class="control-container">
       <button id="record-start">Record</button>
