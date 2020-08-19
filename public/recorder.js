@@ -10,12 +10,14 @@ let recordedChunks = [];
 var recorderStartedEvent = new Event('recorder-started');
 var recorderStoppedEvent = new Event('recorder-stopped');
 
+var showEndCountdownEvent = new Event('show-end-countdown');
+
 /**
  * Mime types, should be in order of preference.
  */
 var types = [
 	"video/webm\;codecs=vp9,opus",
-	"video/webm\;codecs=vp8", //doesnt work on mac, but needed for pi
+	// "video/webm\;codecs=vp8", //doesnt work on mac, but needed for pi
     "video/webm\;codecs=h264",
     "video/webm",
     "video/mpeg",
@@ -25,8 +27,10 @@ var types = [
 /**
  * Event handlers
  */
-document.getElementById('record-start').addEventListener('click', startRecorder);
 document.getElementById('record-stop').addEventListener('click', stopRecorder);
+
+window.addEventListener('start-countdown-ended', startRecorder);
+
 
 /**
  * Recording logic
@@ -112,7 +116,10 @@ async function startRecorder() {
 
     recorder.start()
 
-    await new Promise(r => setTimeout(r, 30000));
+    await new Promise(r => setTimeout(r, 25000));
+    window.dispatchEvent(showEndCountdownEvent)
+    await new Promise(r => setTimeout(r, 5000));
+
     if (recorder.state == 'recording') {
         stopRecorder();
     }

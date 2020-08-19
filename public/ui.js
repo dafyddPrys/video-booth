@@ -3,17 +3,28 @@
  * 
  * Wrap this module so nothing bleeds into global scope
  */
+
+// we want these in the global scope
+var startCountDownEnded = new Event('start-countdown-ended');
+
+
 (() => {
   const recordButton = document.getElementById('record-start');
   const stopButton = document.getElementById('record-stop');
   const blinker = document.getElementById('recording-status-blink');
   const timer = document.getElementById('recording-status-timer');
+
   /**
    * Event handlers
    */
+  document.getElementById('record-start').addEventListener('click', startVideoCountdown);
   
   window.addEventListener('recorder-started', showRecordingState);
   window.addEventListener('recorder-stopped', showNotRecordingState);
+  window.addEventListener('recorder-stopped', hideEndVideoCountdown);
+  
+  window.addEventListener('start-countdown-ended', hideStartVideoCountdown);
+  window.addEventListener('show-end-countdown', startEndCountdown);
 
   function showNotRecordingState() {
     console.log('not recording')
@@ -97,6 +108,51 @@
   function stopBlinker() {
     blink = false;
     blinker.style.backgroundColor = 'black';
+  }
+
+
+  /**
+   * Start video countdown
+   */
+  async function startVideoCountdown() {
+    const d = document.getElementById('start-countdown');
+    d.removeAttribute('hidden');
+
+    if (!recordButton.hasAttribute('hidden')) {
+      recordButton.setAttribute('hidden', '')
+    }
+
+    for (i = 3; i > 0; i--) {
+      d.childNodes[3].innerHTML = i
+      await new Promise(r => setTimeout(r, 1000));
+    } 
+
+    // start recorder
+    window.dispatchEvent(startCountDownEnded);
+  }
+
+  function hideStartVideoCountdown() {
+    const d = document.getElementById('start-countdown');
+    d.setAttribute('hidden', true);
+  }
+
+  /**
+   * Countdown to video ending
+   */
+  async function startEndCountdown() {
+    console.log('start end countdown');
+    const d = document.getElementById('end-countdown');
+    d.removeAttribute('hidden');
+
+    for (i=5; i >= 0; i--) {
+      d.childNodes[3].innerHTML = i;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+
+  function hideEndVideoCountdown(){
+    const d = document.getElementById('end-countdown');
+    d.setAttribute('hidden', true)
   }
 
 })();
