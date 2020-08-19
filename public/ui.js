@@ -6,6 +6,8 @@
 
 // we want these in the global scope
 var startCountDownEnded = new Event('start-countdown-ended');
+var showEndCountdownEvent = new Event('show-end-countdown');
+
 
 
 (() => {
@@ -17,11 +19,13 @@ var startCountDownEnded = new Event('start-countdown-ended');
   /**
    * Event handlers
    */
-  document.getElementById('record-start').addEventListener('click', startVideoCountdown);
+  recordButton.addEventListener('click', startVideoCountdown);
+  recordButton.addEventListener('click', hideThanksMessage);
   
   window.addEventListener('recorder-started', showRecordingState);
   window.addEventListener('recorder-stopped', showNotRecordingState);
   window.addEventListener('recorder-stopped', hideEndVideoCountdown);
+  window.addEventListener('recorder-stopped', showThanksMessage);
   
   window.addEventListener('start-countdown-ended', hideStartVideoCountdown);
   window.addEventListener('show-end-countdown', startEndCountdown);
@@ -64,8 +68,9 @@ var startCountDownEnded = new Event('start-countdown-ended');
       // otherwise it randomly sets the timer to e.g. 23
       if (!countdown) break; 
       time--;
-      if (time < 0) {
-        console.log("STOP!");
+
+      if (time == 5) {
+        window.dispatchEvent(showEndCountdownEvent);
       }
       timer.innerHTML = time;
     }
@@ -93,10 +98,13 @@ var startCountDownEnded = new Event('start-countdown-ended');
     
     while (blink) {
       await new Promise(r => setTimeout(r, 500));
+      // handles case where you stop recording during a pending promise
+      if (!blink) break; 
+
       if (flipFlop) {
-        blinker.style.backgroundColor = 'red'
+        blinker.style.opacity = 0;
       } else {
-        blinker.style.backgroundColor = 'black'
+        blinker.style.opacity = 1;
       }
       flipFlop = !flipFlop
     }
@@ -107,7 +115,7 @@ var startCountDownEnded = new Event('start-countdown-ended');
    */
   function stopBlinker() {
     blink = false;
-    blinker.style.backgroundColor = 'black';
+    blinker.style.opacity = 0;
   }
 
 
@@ -115,6 +123,7 @@ var startCountDownEnded = new Event('start-countdown-ended');
    * Start video countdown
    */
   async function startVideoCountdown() {
+    hidePrompt();
     const d = document.getElementById('start-countdown');
     d.removeAttribute('hidden');
 
@@ -153,6 +162,37 @@ var startCountDownEnded = new Event('start-countdown-ended');
   function hideEndVideoCountdown(){
     const d = document.getElementById('end-countdown');
     d.setAttribute('hidden', true)
+  }
+
+  /**
+   * Thanks message
+   */
+  async function showThanksMessage() {
+    const d = document.getElementById('thanks');
+    d.removeAttribute('hidden');
+    await new Promise(r => setTimeout(r, 3000));
+    hideThanksMessage();
+    showPrompt();
+  }
+
+  function hideThanksMessage() {
+    const d = document.getElementById('thanks');
+    d.setAttribute('hidden', true);
+  }
+
+
+  /**
+   * Prompt
+   */
+
+  function hidePrompt() {
+    const d = document.getElementById('prompt');
+    d.setAttribute('hidden', true);
+  }
+
+  function showPrompt() {
+    const d = document.getElementById('prompt');
+    d.removeAttribute('hidden');
   }
 
 })();

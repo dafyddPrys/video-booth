@@ -10,8 +10,6 @@ let recordedChunks = [];
 var recorderStartedEvent = new Event('recorder-started');
 var recorderStoppedEvent = new Event('recorder-stopped');
 
-var showEndCountdownEvent = new Event('show-end-countdown');
-
 /**
  * Mime types, should be in order of preference.
  */
@@ -116,10 +114,7 @@ async function startRecorder() {
 
     recorder.start()
 
-    await new Promise(r => setTimeout(r, 25000));
-    window.dispatchEvent(showEndCountdownEvent)
-    await new Promise(r => setTimeout(r, 5000));
-
+    await new Promise(r => setTimeout(r, 30000));
     if (recorder.state == 'recording') {
         stopRecorder();
     }

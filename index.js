@@ -8,7 +8,7 @@ const port = 3000;
 const app = express();
 
 // Videos came through at about 11MB, 30 to play it safe.
-app.use(bodyParser.json({ limit: '30mb' }));
+app.use(bodyParser.json({ limit: '100mb' }));
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
