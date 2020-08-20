@@ -6,10 +6,6 @@
 var recorder;
 let recordedChunks = [];
 
-// used to trigger functions in ui.js
-var recorderStartedEvent = new Event('recorder-started');
-var recorderStoppedEvent = new Event('recorder-stopped');
-
 /**
  * Mime types, should be in order of preference.
  */
@@ -22,12 +18,22 @@ var types = [
     "video/mp4",
 ];
 
+
+// used to trigger functions in ui.js
+var recorderStartedEvent = new Event('recorder-started');
+var recorderStoppedEvent = new Event('recorder-stopped');
+
 /**
  * Event handlers
  */
-document.getElementById('record-stop').addEventListener('click', stopRecorder);
+document.getElementById('record-stop').addEventListener('click', () => {
+    console.log('record-stop: stop recorder')
+    stopRecorder();
+});
 
-window.addEventListener('start-countdown-ended', startRecorder);
+window.addEventListener('start-countdown-ended', () => {
+    startRecorder();
+});
 
 
 /**
@@ -72,6 +78,7 @@ function handleDataAvailable(event) {
 }
 
 function uploadToMain() {
+    console.log('uploading to main');
     const reader = new FileReader()
     reader.onload = function() {
         const b64 = reader.result.replace(/^data:.+;base64,/, '');
@@ -114,15 +121,26 @@ async function startRecorder() {
 
     recorder.start()
 
-    await new Promise(r => setTimeout(r, 30000));
-    if (recorder.state == 'recording') {
-        stopRecorder();
+
+    let time = 30;
+    while (time >= 0) {
+        if (recorder.state != 'recording') {
+            console.log('stopped recording. ')
+            break
+        }
+        if (time == 0) {
+            console.log('startRecorder: stop recorder')
+            stopRecorder();
+            break
+        }
+        await new Promise(r => setTimeout(r, 1000));
+        time--;
     }
 }
 
 function stopRecorder() {
+    console.log('stopping recorder');
     window.dispatchEvent(recorderStoppedEvent);
-    console.log('stopping');
     recorder.stop();
 }
 

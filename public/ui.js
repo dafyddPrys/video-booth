@@ -16,41 +16,50 @@ var showEndCountdownEvent = new Event('show-end-countdown');
   const blinker = document.getElementById('recording-status-blink');
   const timer = document.getElementById('recording-status-timer');
 
+  let isRecording = false;
+
   /**
    * Event handlers
    */
-  recordButton.addEventListener('click', startVideoCountdown);
-  recordButton.addEventListener('click', hideThanksMessage);
+  recordButton.addEventListener('click', () => {
+    console.log('event: record button clicked')
+    hideThanksMessage();
+    startVideoCountdown();
+    hidePrompt();
+  })
   
-  window.addEventListener('recorder-started', showRecordingState);
-  window.addEventListener('recorder-stopped', showNotRecordingState);
-  window.addEventListener('recorder-stopped', hideEndVideoCountdown);
-  window.addEventListener('recorder-stopped', showThanksMessage);
+  window.addEventListener('recorder-started', () => {
+    console.log('event: recorderStarted')
+    isRecording = true;
+    showStopButton();
+    startTimer();
+    startBlinker();
+  });
+  window.addEventListener('recorder-stopped', () => {
+    console.log('event: recorder-stopped')
+    isRecording = false
+    showRecordButton();
+    resetTimer();
+    stopBlinker();
+
+    hideEndVideoCountdown();
+    showThanksMessage();
+  })
+
   
   window.addEventListener('start-countdown-ended', hideStartVideoCountdown);
   window.addEventListener('show-end-countdown', startEndCountdown);
 
-  function showNotRecordingState() {
-    console.log('not recording')
-    if (recordButton.hasAttribute('hidden')) {
-      recordButton.removeAttribute('hidden')
-    }
-
+  function showRecordButton() {
+    console.log('showRecordButton');
+    recordButton.removeAttribute('hidden')
     stopButton.setAttribute('hidden', true);
-
-    resetTimer();
-    stopBlinker();
   }
 
-  function showRecordingState() {
-    if (stopButton.hasAttribute('hidden')) {
-      stopButton.removeAttribute('hidden');
-    }
-
+  function showStopButton() {
+    console.log('showStopButton');
+    stopButton.removeAttribute('hidden');
     recordButton.setAttribute('hidden', true);
-
-    startTimer();
-    startBlinker();
   }
 
   // countdown is a signal so we can stop the countdown
@@ -60,6 +69,7 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    * Count down from 30 to 0. Stop the recording if you hit 0.
    */
   async function startTimer() {
+    console.log('statTimer')
     countdown = true;
     let time = 30;
     while (countdown) {
@@ -80,6 +90,7 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    * Reset the countdown to 30
    */
   function resetTimer() {
+    console.log('resetTimer');
     countdown = false;
     timer.innerHTML = '30'
   }
@@ -93,6 +104,7 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    * Make the little red dot flash
    */
   async function startBlinker() {
+    console.log('startBlinker');
     blink = true;
     flipFlop = true;
     
@@ -114,6 +126,7 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    * Stop the little red dot from flashing
    */
   function stopBlinker() {
+    console.log('stopBlinker')
     blink = false;
     blinker.style.opacity = 0;
   }
@@ -123,7 +136,7 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    * Start video countdown
    */
   async function startVideoCountdown() {
-    hidePrompt();
+    console.log('startVideoCountdown')
     const d = document.getElementById('start-countdown');
     d.removeAttribute('hidden');
 
@@ -141,6 +154,7 @@ var showEndCountdownEvent = new Event('show-end-countdown');
   }
 
   function hideStartVideoCountdown() {
+    console.log('hideStartVideoCountdown')
     const d = document.getElementById('start-countdown');
     d.setAttribute('hidden', true);
   }
@@ -149,17 +163,21 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    * Countdown to video ending
    */
   async function startEndCountdown() {
-    console.log('start end countdown');
+    console.log('startEndCountdown');
     const d = document.getElementById('end-countdown');
     d.removeAttribute('hidden');
 
     for (i=5; i >= 0; i--) {
       d.childNodes[3].innerHTML = i;
       await new Promise(r => setTimeout(r, 1000));
+      if (!isRecording) {
+        break;
+      }
     }
   }
 
   function hideEndVideoCountdown(){
+    console.log('hideEndVideoCountdown')
     const d = document.getElementById('end-countdown');
     d.setAttribute('hidden', true)
   }
@@ -168,14 +186,19 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    * Thanks message
    */
   async function showThanksMessage() {
+    console.log('showThanksMessage')
     const d = document.getElementById('thanks');
     d.removeAttribute('hidden');
     await new Promise(r => setTimeout(r, 3000));
+
     hideThanksMessage();
-    showPrompt();
+    if (!isRecording) {
+      showPrompt();
+    }
   }
 
   function hideThanksMessage() {
+    console.log('hideThanksMessage')
     const d = document.getElementById('thanks');
     d.setAttribute('hidden', true);
   }
@@ -186,11 +209,13 @@ var showEndCountdownEvent = new Event('show-end-countdown');
    */
 
   function hidePrompt() {
+    console.log('hidePrompt')
     const d = document.getElementById('prompt');
     d.setAttribute('hidden', true);
   }
 
   function showPrompt() {
+    console.log('showPrompt')
     const d = document.getElementById('prompt');
     d.removeAttribute('hidden');
   }
