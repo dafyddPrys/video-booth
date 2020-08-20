@@ -10,7 +10,7 @@ let recordedChunks = [];
  * Mime types, should be in order of preference.
  */
 var types = [
-	"video/webm\;codecs=vp9,opus",
+	// "video/webm\;codecs=vp9,opus", // This one caused the pi to be jerky
 	"video/webm\;codecs=vp8", //doesnt work on mac, but needed for pi
     "video/webm\;codecs=h264",
     "video/webm",

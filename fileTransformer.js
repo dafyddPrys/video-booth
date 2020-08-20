@@ -47,7 +47,7 @@ async function convertFile(filename) {
     // Set video bitrate for mp4 output file. The built-in function seemed to append a 'b' to the value which upset ffmpeg.
     video.addCommand('-b:v', '2500k' );
     // Add audio delay to output file in ms using an audio filter
-    video.addCommand('-af', "adelay=617" );
+    video.addCommand('-af', "adelay=100" );
     video.addCommand('-threads', '2');
 
     // console.debug(video.info_configuration);
