@@ -15,11 +15,16 @@ const fileQueue = [];
 // watchForNewFiles watches for new files. If new file extension ends
 // in `extension`, then add the filename to the `queue`.
 function watchForNewFiles(dir, extension, queue) {
+  console.log('Watching for file changes')
   fs.watch(dir, (eventType, filename) => {
     if (filename) {
       if (eventType == 'rename' && filename.endsWith(extension)) {
-        console.log(`Adding ${filename} to queue`);
-        queue.push(filename)
+        if (!queue.includes(filename)) {
+          console.log(`Adding ${filename} to queue`);
+          queue.push(filename);
+        } else {
+          console.log(`file ${filename} already exists on queue. doing nothing`);
+        }
       } else {
         console.debug(`Ignoring file event type ${eventType} on file ${filename}`);
       }
@@ -42,7 +47,7 @@ async function convertFile(filename) {
     // Set video bitrate for mp4 output file. The built-in function seemed to append a 'b' to the value which upset ffmpeg.
     video.addCommand('-b:v', '2500k' );
     // Add audio delay to output file in ms using an audio filter
-    video.addCommand('-af', "adelay=850" );
+    video.addCommand('-af', "adelay=617" );
     video.addCommand('-threads', '2');
 
     // console.debug(video.info_configuration);
@@ -89,7 +94,6 @@ async function processQueue(queue, cb) {
   while (true) {
     // If there are no files, wait for a bit and try again
     if (queue.length == 0) {
-      console.debug('No files. Waiting')
       await new Promise(r => setTimeout(r, 1000));
       continue
     }

@@ -3,34 +3,38 @@
  * should go in this file.
  */
 
-const {ipcRenderer} = require('electron');
-
 var recorder;
 let recordedChunks = [];
-
-// used to trigger functions in ui.js
-var recorderStartedEvent = new Event('recorder-started');
-var recorderStoppedEvent = new Event('recorder-stopped');
 
 /**
  * Mime types, should be in order of preference.
  */
 var types = [
 	"video/webm\;codecs=vp9,opus",
-	"video/webm\;codecs=vp8",
+	"video/webm\;codecs=vp8", //doesnt work on mac, but needed for pi
     "video/webm\;codecs=h264",
     "video/webm",
     "video/mpeg",
     "video/mp4",
 ];
 
+
+// used to trigger functions in ui.js
+var recorderStartedEvent = new Event('recorder-started');
+var recorderStoppedEvent = new Event('recorder-stopped');
+
 /**
  * Event handlers
  */
-document.getElementById('record-start').addEventListener('click', startRecorder);
-document.getElementById('record-stop').addEventListener('click', stopRecorder);
+document.getElementById('record-stop').addEventListener('click', () => {
+    console.log('record-stop: stop recorder')
+    stopRecorder();
+});
 
-ipcRenderer.on('download-reply', handleUploadReply);
+window.addEventListener('start-countdown-ended', () => {
+    startRecorder();
+});
+
 
 /**
  * Recording logic
@@ -45,12 +49,16 @@ ipcRenderer.on('download-reply', handleUploadReply);
  */
 function initRecorder(stream) {
     const firstCompatibleMimeType = types.find(t => MediaRecorder.isTypeSupported(t))
-    console.log(`using mime type ${firstCompatibleMimeType}`);
-	var options = { mimeType: firstCompatibleMimeType , videoBitsPerSecond: 5000000, audioBitsPerSecond: 48000};
-
+    console.log(`using first compatible mime type ${firstCompatibleMimeType}`);
+	var options = {
+        mimeType: firstCompatibleMimeType,
+        videoBitsPerSecond: 5000000,
+        audioBitsPerSecond: 48000
+    };
+    
     recorder = new MediaRecorder(stream, options)
-    recorder.ondataavailable = handleDataAvailable;
 	console.log(`Video bitrate ${recorder.videoBitsPerSecond}`);
+    recorder.ondataavailable = handleDataAvailable;
 
     return stream
 }
@@ -70,15 +78,33 @@ function handleDataAvailable(event) {
 }
 
 function uploadToMain() {
+    console.log('uploading to main');
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = function() {
         const b64 = reader.result.replace(/^data:.+;base64,/, '');
-        ipcRenderer.send('download', {
-            data: b64
-        })
+
+        const request = new XMLHttpRequest();
+        request.open("POST", "/upload", true); // true => async
+        request.setRequestHeader("Content-Type", "application/json; charset=UTF-8") // maybe?
+
+        request.onreadystatechange = function() { // Call a function when the state changes.
+            if (this.readyState === XMLHttpRequest.DONE) {
+                if (this.status === 200) {
+                    console.log('Video delivered OK')
+                } else {
+                    console.error(`Not OK! Status: ${this.status}`)
+                }
+                // rm the latest chunk, regardless of whether it was successfully saved or not.
+                recordedChunks.shift();
+            }
+        }
+
+        request.send(JSON.stringify({
+            data: b64,
+        }));
     }
 
-    reader.readAsDataURL(recordedChunks[0]);
+    reader.readAsDataURL(recordedChunks[0]); //readAsDataURL reads as base64 encoded string
 }
 
 async function startRecorder() {
@@ -95,34 +121,34 @@ async function startRecorder() {
 
     recorder.start()
 
-    await new Promise(r => setTimeout(r, 30000));
-    if (recorder.state == 'recording') {
-        stopRecorder();
+
+    let time = 30;
+    while (time >= 0) {
+        if (recorder.state != 'recording') {
+            console.log('stopped recording. ');
+            break
+        }
+        if (time == 0) {
+            console.log('startRecorder: stop recorder');
+            stopRecorder();
+            break
+        }
+        await new Promise(r => setTimeout(r, 1000));
+        time--;
     }
 }
 
 function stopRecorder() {
+    console.log('stopping recorder');
     window.dispatchEvent(recorderStoppedEvent);
-
-    console.log('stopping');
     recorder.stop();
 }
 
-function handleUploadReply(event, arg) {
-    if (arg.success) {
-        console.log('video saved successfully')
-        recordedChunks.shift() // remove the chunk that we've successfully saved
-    } else {
-        console.log('error saving video: ${arg.error}')
-    }
-}
 
 
 /**
  * Check which mime types are supported
  */
-
-
 for (var i in types) { 
     console.log(`Is ${types[i]} supported? ${MediaRecorder.isTypeSupported(types[i]) ? "Maybe" : "No"}`);
 };
