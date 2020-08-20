@@ -32,18 +32,19 @@ var showEndCountdownEvent = new Event('show-end-countdown');
     console.log('event: recorderStarted')
     isRecording = true;
     showStopButton();
+    hideRecordButton();
     startTimer();
     startBlinker();
   });
   window.addEventListener('recorder-stopped', () => {
     console.log('event: recorder-stopped')
     isRecording = false
-    showRecordButton();
     resetTimer();
     stopBlinker();
 
     hideEndVideoCountdown();
     showThanksMessage();
+    hideStopButton();
   })
 
   
@@ -53,13 +54,20 @@ var showEndCountdownEvent = new Event('show-end-countdown');
   function showRecordButton() {
     console.log('showRecordButton');
     recordButton.removeAttribute('hidden')
-    stopButton.setAttribute('hidden', true);
+    // stopButton.setAttribute('hidden', true);
+  }
+
+  function hideRecordButton() {
+    recordButton.setAttribute('hidden', true);
   }
 
   function showStopButton() {
     console.log('showStopButton');
     stopButton.removeAttribute('hidden');
-    recordButton.setAttribute('hidden', true);
+  }
+
+  function hideStopButton() {
+    stopButton.setAttribute('hidden', true);
   }
 
   // countdown is a signal so we can stop the countdown
@@ -194,6 +202,7 @@ var showEndCountdownEvent = new Event('show-end-countdown');
     hideThanksMessage();
     if (!isRecording) {
       showPrompt();
+      showRecordButton();
     }
   }
 
