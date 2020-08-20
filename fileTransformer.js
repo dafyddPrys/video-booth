@@ -52,35 +52,23 @@ async function convertFile(filename) {
 
     // console.debug(video.info_configuration);
 
-    let outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
+    this.outFile = await video.save(`${outputDir}/video-${Date.now()}.mp4`);
     console.log(`File saved: ${outFile}`);
 
     if (!copyDir) {
       return
     }
 
-    // Check for presence of USB stick 
-	  fs.access(copyDir, (err) => {
+    this.outFileName = this.outFile.split(/\//g).pop();
+    // Copy the new mp4 file to the USB stick
+    fs.copyFile(this.outFile, copyDir + this.outFileName , (err) => {
       if (err) {
-          console.log(`USB drive not found at ${copyDir}`);
-      } else {
-        console.log(`USB drive found at ${copyDir}.`);
-
-        // from ./out/whatever/test.mp4, get test.mp4
-        let outFileName = outFile.split(/\//g).pop();
-
-        // Copy the new mp4 file to the USB stick
-        fs.copyFile(outFile, copyDir + outFileName , (err) => {
-          if (err) {
-            console.log(`Error copying file ${outFile} to ${copyDir}`);
-          }
-          else {
-            console.log(`File ${outFile} copied to ${copyDir}${outFileName}`);
-          }
-        });	
+        console.log(`Error copying file ${this.outFile} to ${copyDir}`);
+      }
+      else {
+        console.log(`File ${this.outFile} copied to ${copyDir}${this.outFileName}`);
       }
     });
-
 
   } catch (e) {
     console.log(`Failed to process file: ${e.message}`);
