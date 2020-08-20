@@ -19,8 +19,12 @@ function watchForNewFiles(dir, extension, queue) {
   fs.watch(dir, (eventType, filename) => {
     if (filename) {
       if (eventType == 'rename' && filename.endsWith(extension)) {
-        console.log(`Adding ${filename} to queue`);
-        queue.push(filename)
+        if (!queue.includes(filename)) {
+          console.log(`Adding ${filename} to queue`);
+          queue.push(filename);
+        } else {
+          console.log(`file ${filename} already exists on queue. doing nothing`);
+        }
       } else {
         console.debug(`Ignoring file event type ${eventType} on file ${filename}`);
       }

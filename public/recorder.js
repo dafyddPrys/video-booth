@@ -125,11 +125,11 @@ async function startRecorder() {
     let time = 30;
     while (time >= 0) {
         if (recorder.state != 'recording') {
-            console.log('stopped recording. ')
+            console.log('stopped recording. ');
             break
         }
         if (time == 0) {
-            console.log('startRecorder: stop recorder')
+            console.log('startRecorder: stop recorder');
             stopRecorder();
             break
         }
